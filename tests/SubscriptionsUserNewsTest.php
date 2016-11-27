@@ -11,8 +11,14 @@ class SubscriptionsUserNewsTest extends TestCase
      *
      * @return void
      */
-    public function testExample()
+    public function testSubscribeUser()
     {
-        $this->assertTrue(true);
+        $email = 'fm@web-fomin.ru';
+        $limit = 1;
+        $offset = 1;
+        $this->get('subscriptions/user/' . $email . '?limit=' . $limit . '&offset=' . $offset)
+            ->seeJsonEquals([
+                'status_code' => 200,
+            ]);
     }
 }

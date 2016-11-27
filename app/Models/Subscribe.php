@@ -11,6 +11,6 @@ class Subscribe extends Model
 
     public function rubrics()
     {
-        return $this->belongsToMany('App\Models\Rubric', 'subscriptions', 'rubric_id', 'subscribe_id')->withTimestamps();
+        return $this->belongsToMany('App\Models\Rubric', 'subscriptions',  'subscribe_id', 'rubric_id')->withTimestamps();
     }
 }

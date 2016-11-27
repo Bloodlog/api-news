@@ -81,33 +81,37 @@ class SubscribeController extends Controller
      * @param $email
      * @throws UnauthorizedHttpException
      *
-     * @return Response
+     * @return Response json
      * @Rest\Get("subscriptions/user/{email}")
      */
     public function subscriptionsUser(Request $request, $email)
     {
-        //$subscribe = Subscribe::firstOrCreate(array('email' => $email));
-        $subscriptions = Subscribe::has('rubrics')->get();
-        //$subscribe->has('rubrics')->get();
-        //$subscribe->rubrics->;
-        ///dogs?limit=25&offset=50
-        //$limit = $request->limit;
-        //$offset = $request->offset;
+        // Request параметр limit - ограничивающий выдачу
+        $limit = ((int)$request->limit)? : 5;
+        $offset = ((int)$request->offset)? : null;
+        $email = 'fm@web-fomin.ru';
+        $subscriptions = Subscribe::firstOrCreate(array('email' => $email));
+        $rubrics = $subscriptions->rubrics()->where('subscribe_id', $subscriptions->id)->paginate($limit, ['*'], 'offset', $offset);
+        $rubricsArray = $rubrics->toArray();
+        // Извлекаем последний элемент pivot
+        foreach ($rubricsArray["data"] as $key => $value){
+            array_pop($rubricsArray["data"][$key]);
+        }
 
-        //$products = Product::paginate(100);
         $status_code = 200;
         $response = [
             'status_code' => $status_code,
-            'subscriptions'   => $subscriptions,
-        //->getItems()->toArray(),
-            /*'pagination' => [
-                'total'        => $products->getTotal(),
-                'per_page'     => $products->getPerPage(),
-                'current_page' => $products->getCurrentPage(),
-                'last_page'    => $products->getLastPage(),
-                'from'         => $products->getFrom(),
-                'to'           => $products->getTo()
-            ]*/
+            'data'   => $rubricsArray["data"],
+            'pagination' => [
+                'total'         => $rubricsArray['total'],
+                'per_page'      => $rubricsArray['per_page'],
+                'current_page'  => $rubricsArray['current_page'],
+                'last_page'     => $rubricsArray['last_page'],
+                'next_page_url' =>
+                    $rubricsArray['next_page_url'] .= ($rubricsArray['next_page_url'])? '&limit=' . $limit : null,
+                'prev_page_url' =>
+                    $rubricsArray['prev_page_url'] .= ($rubricsArray['prev_page_url'])? '&limit=' . $limit : null,
+            ]
         ];
         return Response::json($response);
     }
@@ -119,7 +123,7 @@ class SubscribeController extends Controller
      * @param $rubric_id
      * @throws UnauthorizedHttpException
      *
-     * @return Response
+     * @return Response Json
      * @Rest\Get("subscriptions/rubric/{rubric_id}")
      */
     public function subscriptionsRubric(Request $request, $rubric_id){
