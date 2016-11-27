@@ -20,14 +20,14 @@ Route::group(['prefix' => 'v1'], function () {
     Route::get('/', ['uses' => 'Api\SubscribeController@index', 'as' => 'index']);
 
     // Подписка пользователя по email на рубрику по id
-    Route::post('subscribe/{id}/user/{email}', ['uses' => 'Api\SubscribeController@subscribe', 'as' => 'subscribe'])
-        ->where(['id' => '[0-9]+']);
+    Route::post('subscribe/{rubric_id}/user/{email}', ['uses' => 'Api\SubscribeController@subscribe', 'as' => 'subscribe'])
+        ->where(['rubric_id' => '[0-9]+']);
 
     // Удаление подписки на рубрику по ID
-    Route::delete('subscribe/{id}/user/{email}/', ['uses' => 'Api\SubscribeController@deleteSubscribe', 'as' => 'delete.subscribe'])
-        ->where(['id' => '[0-9]+']);
+    Route::delete('subscribe/{rubric_id}/user/{email}', ['uses' => 'Api\SubscribeController@deleteSubscribe', 'as' => 'delete.subscribe'])
+        ->where(['rubric_id' => '[0-9]+']);
 
-    //Удаление всех подписок
+    //Удаление всех подписок по email
     Route::delete('subscriptions/user/{email}', ['uses' => 'Api\SubscribeController@deleteSubscribes', 'as' => 'delete.subscribes'])
         ->where(['id' => '[0-9]+']);
 
@@ -39,7 +39,7 @@ Route::group(['prefix' => 'v1'], function () {
     //->middleware('auth:api');
 
     // Отображение всех подписанных пользователей у рубрики
-    Route::get('subscriptions/rubric/{id}', ['uses' => 'Api\SubscribeController@subscriptionsRubric', 'as' => 'subscriptions.rubric'])
-        ->where(['id' => '[0-9]+']);
+    Route::get('subscriptions/rubric/{rubric_id}', ['uses' => 'Api\SubscribeController@subscriptionsRubric', 'as' => 'subscriptions.rubric'])
+        ->where(['rubric_id' => '[0-9]+']);
         //->middleware('auth:api');
 });

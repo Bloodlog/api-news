@@ -8,12 +8,9 @@ class Subscribe extends Model
 {
     protected $fillable = ['email'];
     //
-    /*public function roles()
-    {
-        return $this->belongsToMany('Rubric', 'subscriptions', 'subscribe_id', 'rubric_id');
-    }*/
+
     public function rubrics()
     {
-        return $this->belongsToMany('App\Models\Rubric', 'subscriptions', 'subscribe_id', 'rubric_id')->withTimestamps();
+        return $this->belongsToMany('App\Models\Rubric', 'subscriptions', 'rubric_id', 'subscribe_id')->withTimestamps();
     }
 }

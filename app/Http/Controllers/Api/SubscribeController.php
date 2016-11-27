@@ -14,22 +14,22 @@ class SubscribeController extends Controller
     /**
      * Подписка пользователя по email на id рубрику
      *
-     * @param $id
+     * @param $rubric_id
      * @param $email
      *
      * @return Response
      *
      * @Rest\Post("subscribe/{id}/user/{email}")
      */
-    public function subscribe($id, $email){
+    public function subscribe($rubric_id, $email){
         //
-        $rubric = Rubric::find($id);
+        $rubric = Rubric::find($rubric_id);
         // Проверка есть ли email  таблице
         $subscribe = Subscribe::firstOrCreate(array('email' => $email));
         //Удаляем свзяь
-        $rubric->subscribes()->detach($subscribe->id);
+        $rubric->subscribes()->detach( $subscribe->id );
         //Добавляем связь
-        $rubric->subscribes()->attach($subscribe->id);
+        $rubric->subscribes()->attach( $subscribe->id );
         $status_code = 200;
         return Response::json(array(
             'status_code' => $status_code,
@@ -39,17 +39,18 @@ class SubscribeController extends Controller
     /**
      * Удаление подписки по ID & email
      *
-     * @param $id
+     * @param $rubric_id
      * @param $email
      *
      * @return Response
+     * @Rest\Delete("subscribe/{rubric_id}/user/{email}")
      */
-    public function deleteSubscribe($id, $email){
-        $rubric = Rubric::find($id);
+    public function deleteSubscribe($rubric_id, $email){
+        $rubric = Rubric::find($rubric_id);
         // Проверка есть ли email  таблице
         $subscribe = Subscribe::firstOrCreate(array('email' => $email));
         //Удаляем свзяь
-        $rubric->subscribes()->detach($subscribe->id);
+        $rubric->subscribes()->detach( $subscribe->id );
         $status_code = 200;
         return Response::json(array(
             'status_code' => $status_code,
@@ -62,11 +63,11 @@ class SubscribeController extends Controller
      * @param $email
      *
      * @return Response
+     * @Rest\Delete("subscriptions/user/{email}")
      */
     public function deleteSubscribes($email){
         $subscribe = Subscribe::firstOrCreate(array('email' => $email));
-        // Передаём атрибут id подписчика для удаления
-        $subscribe->rubrics()->detach(['subscribe_id' => $subscribe->id]);
+        $subscribe->rubrics()->detach();
         $status_code = 200;
         return Response::json(array(
             'status_code' => $status_code,
@@ -81,27 +82,54 @@ class SubscribeController extends Controller
      * @throws UnauthorizedHttpException
      *
      * @return Response
+     * @Rest\Get("subscriptions/user/{email}")
      */
     public function subscriptionsUser(Request $request, $email)
     {
+        //$subscribe = Subscribe::firstOrCreate(array('email' => $email));
+        $subscriptions = Subscribe::has('rubrics')->get();
+        //$subscribe->has('rubrics')->get();
+        //$subscribe->rubrics->;
         ///dogs?limit=25&offset=50
-        $limit = $request->limit;
-        $offset = $request->offset;
+        //$limit = $request->limit;
+        //$offset = $request->offset;
+
+        //$products = Product::paginate(100);
+        $status_code = 200;
+        $response = [
+            'status_code' => $status_code,
+            'subscriptions'   => $subscriptions,
+        //->getItems()->toArray(),
+            /*'pagination' => [
+                'total'        => $products->getTotal(),
+                'per_page'     => $products->getPerPage(),
+                'current_page' => $products->getCurrentPage(),
+                'last_page'    => $products->getLastPage(),
+                'from'         => $products->getFrom(),
+                'to'           => $products->getTo()
+            ]*/
+        ];
+        return Response::json($response);
     }
 
     /**
      * Отображение всех подписанных пользователей у рубрики
      *
      * @param Request $request
-     * @param $id
+     * @param $rubric_id
      * @throws UnauthorizedHttpException
      *
      * @return Response
+     * @Rest\Get("subscriptions/rubric/{rubric_id}")
      */
-    public function subscriptionsRubric(Request $request, $id){
+    public function subscriptionsRubric(Request $request, $rubric_id){
         ///dogs?limit=25&offset=50
         $subscribes = Subscribe::all();
         dd($subscribes);
+        $status_code = 200;
+        return Response::json(array(
+            'status_code' => $status_code,
+        ));
     }
 
     // Документация

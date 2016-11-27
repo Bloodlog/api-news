@@ -13,7 +13,9 @@ class SubscribeNewsTest extends TestCase
      */
     public function testSubscribeUser()
     {
-        $this->post('api/v1/subscribe/1/user/fm@web-fomin.ru')
+        $rubric_id = 2;
+        $email = 'bloodlog@mail.ru';
+        $this->post('api/v1/subscribe/' . $rubric_id. '/user/' . $email)
             ->seeJsonEquals([
                 'status_code' => 200,
             ]);
