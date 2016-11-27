@@ -14,10 +14,11 @@ class CreateSubscriptionsTable extends Migration
     public function up()
     {
         Schema::create('subscriptions', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('subscribe_id');
-            $table->integer('rubric_id');
+            $table->integer('subscribe_id')->unsigned()->index();
+            $table->integer('rubric_id')->unsigned()->index();
             $table->timestamps();
+            $table->foreign('subscribe_id')->references('id')->on('subscribes')->onDelete('cascade');
+            $table->foreign('rubric_id')->references('id')->on('rubrics')->onDelete('cascade');
         });
     }
 
