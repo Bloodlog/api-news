@@ -11,8 +11,10 @@ class DeleteSubscribeNewsTest extends TestCase
      *
      * @return void
      */
-    /*public function testDeleteSubscribe(){
-        $this->call('DELETE', 'api/v1/subscribe/2/user/fm@web-fomin.ru')
-              ->see('2fm@web-fomin.ru');
-    }*/
+    public function testDeleteSubscribe(){
+        $this->delete( 'api/v1/subscribe/1/user/fm@web-fomin.ru')
+            ->seeJsonEquals([
+                'status_code' => 200,
+            ]);
+    }
 }

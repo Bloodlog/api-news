@@ -64,11 +64,9 @@ class SubscribeController extends Controller
      * @return Response
      */
     public function deleteSubscribes($email){
-        $rubric = Rubric::all();
-        // Проверка есть ли email  таблице
         $subscribe = Subscribe::firstOrCreate(array('email' => $email));
-        //Удаляем свзяь
-        $rubric->subscribes()->detach($subscribe->id);
+        // Передаём атрибут id подписчика для удаления
+        $subscribe->rubrics()->detach(['subscribe_id' => $subscribe->id]);
         $status_code = 200;
         return Response::json(array(
             'status_code' => $status_code,
