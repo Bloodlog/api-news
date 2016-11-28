@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 class SubscriptionsRubricNewsTest extends TestCase
 {
     /**
+     * Отображение всех подписанных пользователей у рубрики
      * A basic test example.
      *
      * @return void

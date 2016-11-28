@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 class DeleteSubscribeNewsTest extends TestCase
 {
     /**
+     * Удаление подписки по ID & email
      * A basic test example.
      *
      * @return void

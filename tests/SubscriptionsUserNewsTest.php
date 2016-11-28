@@ -7,6 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 class SubscriptionsUserNewsTest extends TestCase
 {
     /**
+     * Отображение всех подписок пользователя
      * A basic test example.
      *
      * @return void
@@ -16,7 +17,8 @@ class SubscriptionsUserNewsTest extends TestCase
         $email = 'fm@web-fomin.ru';
         $limit = 1;
         $offset = 1;
-        $this->get('subscriptions/user/' . $email . '?limit=' . $limit . '&offset=' . $offset)
+        $xml = '&xml=false';
+        $this->get('subscriptions/user/' . $email . '?limit=' . $limit . '&offset=' . $offset . $xml)
             ->seeJsonEquals([
                 'status_code' => 200,
             ]);

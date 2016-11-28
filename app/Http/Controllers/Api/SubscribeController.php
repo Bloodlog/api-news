@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Subscribe;
 use App\Models\Subscription;
 use App\Models\Rubric;
+use SimpleXMLElement;
 
 class SubscribeController extends Controller
 {
@@ -88,8 +89,11 @@ class SubscribeController extends Controller
     {
         // Request параметр limit - ограничивающий выдачу
         $limit = ((int)$request->limit)? : 5;
+        // Request параметр offset - указывающий страницу
         $offset = ((int)$request->offset)? : null;
-        $email = 'fm@web-fomin.ru';
+        // Request параметр отвечающий за выдачу ответа в xml
+        $xml = ($request->xml)? : false;
+
         $subscriptions = Subscribe::firstOrCreate(array('email' => $email));
         $rubrics = $subscriptions->rubrics()->where('subscribe_id', $subscriptions->id)->paginate($limit, ['*'], 'offset', $offset);
         $rubricsArray = $rubrics->toArray();
@@ -98,8 +102,11 @@ class SubscribeController extends Controller
             array_pop($rubricsArray["data"][$key]);
         }
 
+        $requestXml = ($xml)? '&xml=true': null;
+        $rubricsArray['next_page_url'] .= ($rubricsArray['next_page_url'])? '&limit=' . $limit . $requestXml: null;
+        $rubricsArray['prev_page_url'] .= ($rubricsArray['prev_page_url'])? '&limit=' . $limit . $requestXml: null ;
         $status_code = 200;
-        $response = [
+        $responseArray = [
             'status_code' => $status_code,
             'data'   => $rubricsArray["data"],
             'pagination' => [
@@ -107,13 +114,13 @@ class SubscribeController extends Controller
                 'per_page'      => $rubricsArray['per_page'],
                 'current_page'  => $rubricsArray['current_page'],
                 'last_page'     => $rubricsArray['last_page'],
-                'next_page_url' =>
-                    $rubricsArray['next_page_url'] .= ($rubricsArray['next_page_url'])? '&limit=' . $limit : null,
-                'prev_page_url' =>
-                    $rubricsArray['prev_page_url'] .= ($rubricsArray['prev_page_url'])? '&limit=' . $limit : null,
+                'next_page_url' => $rubricsArray['next_page_url'],
+                'prev_page_url' => $rubricsArray['prev_page_url'],
             ]
         ];
-        return Response::json($response);
+        // Проверка каким способом отдавать данные
+        $response = ($xml)? $this->array_to_xml($responseArray) : Response::json($responseArray);
+        return $response;
     }
 
     /**
@@ -127,13 +134,41 @@ class SubscribeController extends Controller
      * @Rest\Get("subscriptions/rubric/{rubric_id}")
      */
     public function subscriptionsRubric(Request $request, $rubric_id){
-        ///dogs?limit=25&offset=50
-        $subscribes = Subscribe::all();
-        dd($subscribes);
+        // Request параметр limit - ограничивающий выдачу
+        $limit = ((int)$request->limit)? : 5;
+        // Request параметр offset - указывающий страницу
+        $offset = ((int)$request->offset)? : null;
+        // Request параметр отвечающий за выдачу ответа в xml
+        $xml = ($request->xml)? : false;
+        // Находим рубрику
+        $rubric = Rubric::find($rubric_id);
+        $subscribes = $rubric->subscribes()->where('rubric_id', $rubric_id)->paginate($limit, ['*'], 'offset', $offset);
+        $subscribesArray = $subscribes->toArray();
+
+        // Извлекаем последний элемент pivot
+        foreach ($subscribesArray["data"] as $key => $value){
+            array_pop($subscribesArray["data"][$key]);
+        }
+
+        $requestXml = ($xml)? '&xml=true': null;
+        $subscribesArray['next_page_url'] .= ($subscribesArray['next_page_url'])? '&limit=' . $limit . $requestXml: null;
+        $subscribesArray['prev_page_url'] .= ($subscribesArray['prev_page_url'])? '&limit=' . $limit . $requestXml: null ;
         $status_code = 200;
-        return Response::json(array(
+        $responseArray = [
             'status_code' => $status_code,
-        ));
+            'data'   => $subscribesArray["data"],
+            'pagination' => [
+                'total'         => $subscribesArray['total'],
+                'per_page'      => $subscribesArray['per_page'],
+                'current_page'  => $subscribesArray['current_page'],
+                'last_page'     => $subscribesArray['last_page'],
+                'next_page_url' => $subscribesArray['next_page_url'],
+                'prev_page_url' => $subscribesArray['prev_page_url'],
+            ]
+        ];
+        // Проверка каким способом отдавать данные
+        $response = ($xml)? $this->array_to_xml($responseArray) : Response::json($responseArray);
+        return $response;
     }
 
     // Документация
@@ -152,6 +187,28 @@ class SubscribeController extends Controller
             // Отображение всех подписанных пользователей у рубрики<br>
             subscriptions/rubric/{id}<br>
         ';
+    }
+
+    /**
+     * Преобразование массива в xml
+     * @param $data
+     * @param null $xml_data
+     * @return xml
+     */
+    private function array_to_xml ( $data, &$xml_data = null) {
+        if (!isset($xml_data)) $xml_data = new SimpleXMLElement('<?xml version="1.0"?><data></data>');
+        foreach( $data as $key => $value ) {
+            if( is_numeric($key) ){
+                $key = 'item'.$key;
+            }
+            if( is_array($value) ) {
+                $subnode = $xml_data->addChild($key);
+                $this->array_to_xml($value, $subnode);
+            } else {
+                $xml_data->addChild("$key",htmlspecialchars("$value"));
+            }
+        }
+        return $xml_data->asXML();
     }
 
 }

@@ -10,6 +10,6 @@ class Rubric extends Model
 
     public function subscribes()
     {
-        return $this->belongsToMany('App\Models\Subscription', 'subscriptions', 'rubric_id', 'subscribe_id' )->withTimestamps();
+        return $this->belongsToMany('App\Models\Subscribe', 'subscriptions', 'rubric_id', 'subscribe_id' )->withTimestamps();
     }
 }
