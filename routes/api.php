@@ -33,6 +33,9 @@ Route::group(['prefix' => 'v1'], function () {
 
     // Остальное только после авторизации
 
+    // Авторизация приложения
+    Route::post('login', ['uses' => 'Api\AuthController@authenticateApp', 'as' => 'auth.authenticate']);
+
     // Отображение всех подписок пользователя
     Route::get('subscriptions/user/{email}', ['uses' => 'Api\SubscribeController@subscriptionsUser', 'as' => 'subscriptions.user'])
         ->where(['id' => '[0-9]+']);

@@ -19,19 +19,27 @@ class SubscribeController extends Controller
      * @param $email
      *
      * @return Response
+     * @throws Exception
      *
      * @Rest\Post("subscribe/{id}/user/{email}")
      */
     public function subscribe($rubric_id, $email){
-        //
-        $rubric = Rubric::find($rubric_id);
-        // Проверка есть ли email  таблице
-        $subscribe = Subscribe::firstOrCreate(array('email' => $email));
-        //Удаляем свзяь
-        $rubric->subscribes()->detach( $subscribe->id );
-        //Добавляем связь
-        $rubric->subscribes()->attach( $subscribe->id );
         $status_code = 200;
+        // Если нету подписчика в базе, добавляем
+        $subscribe = Subscribe::firstOrCreate(array('email' => $email));
+        try{
+            // Ошибка на не существующую рубрику
+            $rubric = Rubric::findOrFail($rubric_id);
+        }catch(ValidationException $e){
+            $e = 404;
+        }
+        //Проверка связи
+        //$rubric->has('subscribes')->get();
+        //Удаляем свзяь
+        $rubric->subscribes()->detach($subscribe->id);
+        //Добавляем связь
+        $rubric->subscribes()->attach($subscribe->id);
+
         return Response::json(array(
             'status_code' => $status_code,
         ));
@@ -47,9 +55,14 @@ class SubscribeController extends Controller
      * @Rest\Delete("subscribe/{rubric_id}/user/{email}")
      */
     public function deleteSubscribe($rubric_id, $email){
-        $rubric = Rubric::find($rubric_id);
         // Проверка есть ли email  таблице
         $subscribe = Subscribe::firstOrCreate(array('email' => $email));
+        try{
+            // Ошибка на не существующую рубрику
+            $rubric = Rubric::findOrFail($rubric_id);
+        }catch(ValidationException $e) {
+            $e = 404;
+        }
         //Удаляем свзяь
         $rubric->subscribes()->detach( $subscribe->id );
         $status_code = 200;
@@ -67,6 +80,7 @@ class SubscribeController extends Controller
      * @Rest\Delete("subscriptions/user/{email}")
      */
     public function deleteSubscribes($email){
+        // Приоритетнее добавить подписчика в базу
         $subscribe = Subscribe::firstOrCreate(array('email' => $email));
         $subscribe->rubrics()->detach();
         $status_code = 200;
@@ -140,8 +154,12 @@ class SubscribeController extends Controller
         $offset = ((int)$request->offset)? : null;
         // Request параметр отвечающий за выдачу ответа в xml
         $xml = ($request->xml)? : false;
-        // Находим рубрику
-        $rubric = Rubric::find($rubric_id);
+        try{
+            // Находим рубрику
+            $rubric = Rubric::findOrFail($rubric_id);
+        }catch(ValidationException $e) {
+            $e = 404;
+        }
         $subscribes = $rubric->subscribes()->where('rubric_id', $rubric_id)->paginate($limit, ['*'], 'offset', $offset);
         $subscribesArray = $subscribes->toArray();
 
@@ -210,5 +228,4 @@ class SubscribeController extends Controller
         }
         return $xml_data->asXML();
     }
-
 }

@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Response;
 
 class Handler extends ExceptionHandler
 {
@@ -44,7 +45,29 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        return parent::render($request, $exception);
+        //var_dump($exception);
+        //$statusCode = $exception;
+
+        //return parent::render($request, $exception);
+        //return response()->json(['status_code' => $this->getMessage($exception)], $statusCode);
+        return Response::json(array(
+            'status_code' => $this->getStatusCode($exception),
+        ));
+    }
+
+    protected function getStatusCode(\Exception $e)
+    {
+        if ($e instanceof HttpException) {
+            return $e->getStatusCode();
+        }
+
+        // данное исключение не является потомком \Symfony\Component\HttpKernel\Exception\HttpException,
+        // поэтому небольшой хак
+        if ($e instanceof ModelNotFoundException) {
+            return 404;
+        }
+
+        return 404;
     }
 
     /**
