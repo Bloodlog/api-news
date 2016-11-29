@@ -14,7 +14,7 @@ class LoginNewsTest extends TestCase
      */
     public function testLogin()
     {
-        $this->post('api/v1/login', ['test' => 'test'] ,['HTTP_Authorization' => 'test'])
-            ->see('yes');
+        $this->post('api/v1/auth/app', [] ,['HTTP_Authorization' => '111222333:aaabbbccc'])
+            ->see('access_token');
     }
 }

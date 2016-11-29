@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Support\Facades\App;
 use Response;
 
 class Handler extends ExceptionHandler
@@ -45,11 +46,6 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        //var_dump($exception);
-        //$statusCode = $exception;
-
-        //return parent::render($request, $exception);
-        //return response()->json(['status_code' => $this->getMessage($exception)], $statusCode);
         return Response::json(array(
             'status_code' => $this->getStatusCode($exception),
         ));
@@ -65,6 +61,10 @@ class Handler extends ExceptionHandler
         // поэтому небольшой хак
         if ($e instanceof ModelNotFoundException) {
             return 404;
+        }
+
+        if($e instanceof \App\Http\Middleware\ApiAppAuth) {
+            return 500;
         }
 
         return 404;

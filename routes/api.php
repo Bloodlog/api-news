@@ -33,16 +33,14 @@ Route::group(['prefix' => 'v1'], function () {
 
     // Остальное только после авторизации
 
-    // Авторизация приложения
-    Route::post('login', ['uses' => 'Api\AuthController@authenticateApp', 'as' => 'auth.authenticate']);
+    // Авторизация приложения, получения токена по ключу и секретному слову
+    Route::post('auth/app', ['uses' => 'Api\AuthController@authenticateApp', 'as' => 'auth.authenticate']);
 
     // Отображение всех подписок пользователя
     Route::get('subscriptions/user/{email}', ['uses' => 'Api\SubscribeController@subscriptionsUser', 'as' => 'subscriptions.user'])
-        ->where(['id' => '[0-9]+']);
-    //->middleware('auth:api');
+        ->where(['id' => '[0-9]+'])->middleware('auth.api.app');
 
     // Отображение всех подписанных пользователей у рубрики
     Route::get('subscriptions/rubric/{rubric_id}', ['uses' => 'Api\SubscribeController@subscriptionsRubric', 'as' => 'subscriptions.rubric'])
-        ->where(['rubric_id' => '[0-9]+']);
-        //->middleware('auth:api');
+        ->where(['rubric_id' => '[0-9]+'])->middleware('auth.api.app');
 });

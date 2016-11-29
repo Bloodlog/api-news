@@ -107,6 +107,8 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    'secret_key' => env('SECRET_KEY'),
+
     /*
     |--------------------------------------------------------------------------
     | Logging Configuration
